@@ -6,8 +6,10 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/n/nextstrain-augur/nextstrain-augur-{{ version }}.tar.gz
-  sha256: 2a131514c0aa31cabdb24357a116c8f81e79faff4087caed7b81640195056a9c
+  #url: https://pypi.io/packages/source/n/nextstrain-augur/nextstrain-augur-{{ version }}.tar.gz
+  #sha256: 2a131514c0aa31cabdb24357a116c8f81e79faff4087caed7b81640195056a9c
+  url: https://github.com/nextstrain/augur/archive/703a8143b71eb96f8758cc554745dffe3aa11033.zip
+  sha256: 17723963e7d45294c1940e6f63e9ff5eb47f60d434e62c42be858a56c03ab2ab
 
 build:
   number: 2
