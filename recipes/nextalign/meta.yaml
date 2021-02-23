@@ -8,6 +8,8 @@ package:
 source:
   url: https://github.com/nextstrain/nextclade/archive/{{ name }}-{{ version }}.tar.gz
   sha256: f3890c147dabf4cd11ea085e33ef4f00e198990ce25e9cc3d1dda2cf3c2306e2
+  patches:
+    - 0000.patch
 
 build:
   number: 2

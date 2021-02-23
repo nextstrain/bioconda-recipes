@@ -1,0 +1,15 @@
+diff --git a/scripts/build_locally.sh b/scripts/build_locally.sh
+index af663811..baf12040 100755
+--- a/scripts/build_locally.sh
++++ b/scripts/build_locally.sh
+@@ -48,6 +48,10 @@ fi
+ 
+ # Name of the processor architecture we are running this script on: x86_64, arm64
+ BUILD_ARCH="$(uname -p || uname -m)"
++if [ "${BUILD_ARCH}" == "unknown" ]; then
++  BUILD_ARCH="$(uname -m)"
++fi
++
+ if [ "${BUILD_OS}" == "MacOS" ] && [ ${BUILD_ARCH} == "i386" ]; then
+   # x86_64 is called i386 on macOS, fix that
+   BUILD_ARCH="x86_64"
