@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index e2973bbf..dd58220e 100644
+index e2973bbf..2f0bfec1 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -34,6 +34,9 @@ dev-clang-analyzer:
@@ -7,7 +7,7 @@ index e2973bbf..dd58220e 100644
  	@CMAKE_BUILD_TYPE=Release scripts/build_locally.sh
  
 +conda:
-+	@CMAKE_BUILD_TYPE=Release USE_ADVANCED_COMPILER_FLAGS=0 NEXTALIGN_BUILD_TESTS=0 NEXTALIGN_BUILD_BENCHMARKS=0 NEXTALIGN_STATIC_BUILD=0 scripts/build_locally.sh
++	@CMAKE_BUILD_TYPE=Release USE_ADVANCED_COMPILER_FLAGS=0 NEXTALIGN_BUILD_TESTS=0 NEXTALIGN_BUILD_BENCHMARKS=0 NEXTALIGN_STATIC_BUILD=0 CMAKE_INSTALL_PREFIX="${PREFIX}" CLI_EXE="nextalign" scripts/build_locally.sh
 +
  profile:
  	@CMAKE_BUILD_TYPE=RelWithDebInfo scripts/build_locally.sh
@@ -29,8 +29,26 @@ index bb97ab5d..043bcf5c 100644
  endif ()
 +
 +endif()
+diff --git a/packages/nextalign_cli/CMakeLists.txt b/packages/nextalign_cli/CMakeLists.txt
+index 391e4db3..b6c4c734 100644
+--- a/packages/nextalign_cli/CMakeLists.txt
++++ b/packages/nextalign_cli/CMakeLists.txt
+@@ -44,8 +44,11 @@ add_executable(${PROJECT_NAME}
+   src/filesystem.h
+   )
+ 
+-set_property(TARGET ${PROJECT_NAME} PROPERTY
+-  OUTPUT_NAME nextalign-${SYSTEM_NAME}-${PROCESSOR_NAME})
++if (DEFINED CLI_EXE)
++  set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME ${CLI_EXE})
++else()
++  set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME nextalign-${SYSTEM_NAME}-${PROCESSOR_NAME})
++endif()
+ 
+ set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
+ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 diff --git a/scripts/build_locally.sh b/scripts/build_locally.sh
-index af663811..a0509bc7 100755
+index af663811..30f788de 100755
 --- a/scripts/build_locally.sh
 +++ b/scripts/build_locally.sh
 @@ -48,6 +48,10 @@ fi
@@ -44,7 +62,25 @@ index af663811..a0509bc7 100755
  if [ "${BUILD_OS}" == "MacOS" ] && [ ${BUILD_ARCH} == "i386" ]; then
    # x86_64 is called i386 on macOS, fix that
    BUILD_ARCH="x86_64"
-@@ -306,6 +310,7 @@ pushd "${BUILD_DIR}" > /dev/null
+@@ -134,9 +138,9 @@ fi
+ 
+ BUILD_DIR_DEFAULT="${PROJECT_ROOT_DIR}/.build/${BUILD_PREFIX}${CMAKE_BUILD_TYPE}${BUILD_SUFFIX}"
+ BUILD_DIR="${BUILD_DIR:=${BUILD_DIR_DEFAULT}}"
+-INSTALL_DIR="${PROJECT_ROOT_DIR}/.out"
++INSTALL_DIR=${CMAKE_INSTALL_PREFIX:="${PROJECT_ROOT_DIR}/.out"}
+ CLI_DIR="${BUILD_DIR}/packages/${PROJECT_NAME}_cli"
+-CLI_EXE="nextalign-${HOST_OS}-${HOST_ARCH}"
++CLI_EXE=${CLI_EXE:="nextalign-${HOST_OS}-${HOST_ARCH}"}
+ 
+ CLI="${CLI_DIR}/${CLI_EXE}"
+ if [ "${CMAKE_BUILD_TYPE}" == "Release" ]; then
+@@ -301,11 +305,13 @@ pushd "${BUILD_DIR}" > /dev/null
+   ${CLANG_ANALYZER} cmake "${PROJECT_ROOT_DIR}" \
+     -DCMAKE_MODULE_PATH="${BUILD_DIR}" \
+     -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
++    -DCLI_EXE="${CLI_EXE}" \
+     -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+     -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
      -DCMAKE_CXX_CPPCHECK="${CMAKE_CXX_CPPCHECK}" \
      -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE:=0} \
      -DCMAKE_COLOR_MAKEFILE=${CMAKE_COLOR_MAKEFILE:=1} \
@@ -52,3 +88,20 @@ index af663811..a0509bc7 100755
      -DNEXTALIGN_STATIC_BUILD=${NEXTALIGN_STATIC_BUILD} \
      -DNEXTALIGN_BUILD_BENCHMARKS=${NEXTALIGN_BUILD_BENCHMARKS} \
      -DNEXTALIGN_BUILD_TESTS=${NEXTALIGN_BUILD_TESTS} \
+@@ -356,9 +362,13 @@ fi
+ 
+ pushd "${PROJECT_ROOT_DIR}" > /dev/null
+   print 23 "Run tests";
+-  pushd "${BUILD_DIR}/packages/${PROJECT_NAME}/tests" > /dev/null
+-      eval ${GTPP} ${GDB} ./nextalign_tests --gtest_output=xml:${PROJECT_ROOT_DIR}/.reports/tests.xml || cd .
+-  popd > /dev/null
++  if [ "${NEXTALIGN_BUILD_TESTS}" == 1 ] || [ "${NEXTALIGN_BUILD_TESTS}" == "true" ]; then
++    pushd "${BUILD_DIR}/packages/${PROJECT_NAME}/tests" > /dev/null
++        eval ${GTPP} ${GDB} ./nextalign_tests --gtest_output=xml:${PROJECT_ROOT_DIR}/.reports/tests.xml || cd .
++    popd > /dev/null
++  else
++    echo "Tests are disabled (NEXTALIGN_BUILD_TESTS=${NEXTALIGN_BUILD_TESTS})"
++  fi
+ 
+   print 27 "Run CLI";
+   eval "${GDB}" ${CLI} ${DEV_CLI_OPTIONS} || cd .
