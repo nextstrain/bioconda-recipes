@@ -1,5 +1,36 @@
+diff --git a/Makefile b/Makefile
+index e2973bbf..a45f1b33 100644
+--- a/Makefile
++++ b/Makefile
+@@ -34,6 +34,9 @@ dev-clang-analyzer:
+ prod:
+ 	@CMAKE_BUILD_TYPE=Release scripts/build_locally.sh
+ 
++conda:
++	@CMAKE_BUILD_TYPE=Release USE_ADVANCED_COMPILER_FLAGS=0 scripts/build_locally.sh
++
+ profile:
+ 	@CMAKE_BUILD_TYPE=RelWithDebInfo scripts/build_locally.sh
+ 
+diff --git a/packages/cmake/CFlags.cmake b/packages/cmake/CFlags.cmake
+index bb97ab5d..043bcf5c 100644
+--- a/packages/cmake/CFlags.cmake
++++ b/packages/cmake/CFlags.cmake
+@@ -1,5 +1,6 @@
+ # Adds some useful C compiler flags
+ 
++if(USE_ADVANCED_COMPILER_FLAGS)
+ 
+ ####################### GCC ###################################################
+ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+@@ -239,3 +240,5 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINKER_FLAGS}")
+   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LINKER_FLAGS}")
+ endif ()
++
++endif()
 diff --git a/scripts/build_locally.sh b/scripts/build_locally.sh
-index af663811..baf12040 100755
+index af663811..a0509bc7 100755
 --- a/scripts/build_locally.sh
 +++ b/scripts/build_locally.sh
 @@ -48,6 +48,10 @@ fi
@@ -13,3 +44,11 @@ index af663811..baf12040 100755
  if [ "${BUILD_OS}" == "MacOS" ] && [ ${BUILD_ARCH} == "i386" ]; then
    # x86_64 is called i386 on macOS, fix that
    BUILD_ARCH="x86_64"
+@@ -306,6 +310,7 @@ pushd "${BUILD_DIR}" > /dev/null
+     -DCMAKE_CXX_CPPCHECK="${CMAKE_CXX_CPPCHECK}" \
+     -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE:=0} \
+     -DCMAKE_COLOR_MAKEFILE=${CMAKE_COLOR_MAKEFILE:=1} \
++    -DUSE_ADVANCED_COMPILER_FLAGS=${USE_ADVANCED_COMPILER_FLAGS:=1} \
+     -DNEXTALIGN_STATIC_BUILD=${NEXTALIGN_STATIC_BUILD} \
+     -DNEXTALIGN_BUILD_BENCHMARKS=${NEXTALIGN_BUILD_BENCHMARKS} \
+     -DNEXTALIGN_BUILD_TESTS=${NEXTALIGN_BUILD_TESTS} \

@@ -2,7 +2,7 @@
 
 ls -al
 
-make prod
+make conda
 
 chmod +x "${SRC_DIR}"/nextalign*
 mkdir -p "${PREFIX}/bin"
