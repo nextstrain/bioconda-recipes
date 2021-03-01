@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index e2973bbf..fa6c5c1c 100644
+index e2973bbf..498064a7 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -34,6 +34,9 @@ dev-clang-analyzer:
@@ -7,7 +7,7 @@ index e2973bbf..fa6c5c1c 100644
  	@CMAKE_BUILD_TYPE=Release scripts/build_locally.sh
  
 +conda:
-+	@CMAKE_BUILD_TYPE=Release USE_ADVANCED_COMPILER_FLAGS=0 NEXTALIGN_BUILD_TESTS=0 NEXTALIGN_BUILD_BENCHMARKS=0 NEXTALIGN_STATIC_BUILD=0 CMAKE_INSTALL_PREFIX="${PREFIX}" CLI_EXE="nextalign" RUN_CLI=0 scripts/build_locally.sh
++	@CMAKE_BUILD_TYPE=Release USE_ADVANCED_COMPILER_FLAGS=0 NEXTALIGN_BUILD_TESTS=0 NEXTALIGN_BUILD_BENCHMARKS=0 NEXTALIGN_STATIC_BUILD=1 CMAKE_INSTALL_PREFIX="${PREFIX}" CLI_EXE="nextalign" RUN_CLI=0 scripts/build_locally.sh
 +
  profile:
  	@CMAKE_BUILD_TYPE=RelWithDebInfo scripts/build_locally.sh
